@@ -1,74 +1,121 @@
-import { useEffect } from 'react';
-import { MainLayout } from './components/layout/MainLayout';
-import { Graph3DCanvas } from './components/graph3d/Graph3DCanvas';
-import { GraphLegend } from './components/graph/GraphLegend';
-import { DetailsPanel } from './components/details/DetailsPanel';
-import { ChatPanel } from './components/chat/ChatPanel';
-import { useGraphStore } from './stores/graphStore';
+import { useState } from "react";
+import "./App.css";
+
+// const API_URL = "http://localhost:8080/api/chat";
+const API_URL = "/api/chat";
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  text: string;
+};
+
+type ChatResponse = {
+  answer?: string;
+  gql_query?: string | null;
+  nodes_to_highlight?: string[];
+  edges_to_highlight?: string[];
+  suggested_followups?: string[];
+};
 
 function App() {
-  const { fetchGraph, isLoading, error } = useGraphStore();
+  const [message, setMessage] = useState<string>("");
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: "assistant",
+      text: "Hello! Ask me about the Survivor Network.",
+    },
+  ]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    fetchGraph();
-  }, [fetchGraph]);
+  async function sendMessage() {
+    if (!message.trim()) return;
 
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-accent-cyan border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-400">Loading survivor network...</p>
-          </div>
-        </div>
-      </MainLayout>
-    );
+    const userMessage = message;
+
+    setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          conversation_id: "frontend-chat",
+        }),
+      });
+
+      const data = (await res.json()) as ChatResponse;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: data.answer || "No response.",
+        },
+      ]);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: `Error: ${errorMessage}`,
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  if (error) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <p className="text-accent-red mb-2">Error loading graph</p>
-            <p className="text-gray-400 text-sm">{error}</p>
-            <button
-              onClick={() => fetchGraph()}
-              className="mt-4 px-4 py-2 bg-accent-cyan/20 border border-accent-cyan/50 text-accent-cyan rounded-lg hover:bg-accent-cyan/30 transition-all"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </MainLayout>
-    );
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
   }
 
   return (
-    <MainLayout>
-      {/* Three-panel layout - explicit height chain */}
-      <div className="flex-1 flex flex-col min-h-0" style={{ height: '100%' }}>
-        {/* Top: Graph and Details - flex-1 takes remaining space */}
-        <div className="flex-1 flex overflow-hidden min-h-0">
-          {/* Left: Graph Canvas */}
-          <div className="flex-1 p-4 min-h-0 relative">
-            <Graph3DCanvas />
-            <GraphLegend className="absolute top-8 right-8 z-10" />
-          </div>
+    <div className="app">
+      <div className="chat-container">
+        <header className="header">
+          <h1>Survivor Network AI</h1>
+          <p>Graph RAG assistant powered by Spanner Graph</p>
+        </header>
 
-          {/* Right: Details Panel */}
-          <div className="w-96 max-w-[40%] p-4 pl-0 flex-shrink-0 overflow-y-auto">
-            <DetailsPanel />
-          </div>
-        </div>
+        <main className="messages">
+          {messages.map((m, index) => (
+            <div key={index} className={`message ${m.role}`}>
+              <div className="bubble">{m.text}</div>
+            </div>
+          ))}
 
-        {/* Bottom: Chat Panel - flexible height */}
-        <div className="px-4 pb-4 flex-shrink-0" style={{ height: '40%', minHeight: '300px' }}>
-          <ChatPanel />
-        </div>
+          {loading && (
+            <div className="message assistant">
+              <div className="bubble">Thinking...</div>
+            </div>
+          )}
+        </main>
+
+        <footer className="input-area">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask: Who treats Burns?"
+            rows={2}
+          />
+          <button onClick={sendMessage} disabled={loading}>
+            Send
+          </button>
+        </footer>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
