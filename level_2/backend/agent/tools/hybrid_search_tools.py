@@ -144,6 +144,27 @@ async def hybrid_search(query: str, limit: int = 10) -> str:
 
 
 # TODO: REPLACE_SEMANTIC_SEARCH_TOOL
+async def semantic_search(query: str, limit: int = 10) -> str:
+    """
+    Force semantic/RAG search using embeddings.
+    Use this when the query needs meaning-based matching.
+    """
+    try:
+        service = _get_service()
+        result = service.smart_search(
+            query,
+            force_method=SearchMethod.RAG,
+            limit=limit
+        )
+
+        return _format_results(
+            result["results"],
+            result["analysis"],
+            show_analysis=True
+        )
+
+    except Exception as e:
+        return f"Error in semantic search: {str(e)}"
 
 
 async def keyword_search(query: str, limit: int = 10) -> str:

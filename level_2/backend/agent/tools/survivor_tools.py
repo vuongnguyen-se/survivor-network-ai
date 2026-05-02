@@ -139,3 +139,53 @@ async def get_urgent_needs() -> str:
         import traceback
         traceback.print_exc()
         return f"Error searching for urgent needs: {str(e)}"
+        
+async def find_helper_by_need(need_description: str) -> str:
+    """
+    Find survivors who can help with a specific need using deterministic graph query.
+    This does not rely on semantic search or LLM model calls.
+    """
+    from google.cloud import spanner
+    from google.cloud.spanner_v1 import param_types
+    import os
+
+    client = spanner.Client(project=os.getenv("PROJECT_ID"))
+    instance = client.instance(os.getenv("INSTANCE_ID"))
+    database = instance.database(os.getenv("DATABASE_ID"))
+
+    sql = """
+        GRAPH SurvivorNetwork
+        MATCH (s:Survivors)-[:SurvivorHasSkill]->(sk:Skills)-[:SkillTreatsNeed]->(n:Needs)
+        WHERE LOWER(@need_description) LIKE CONCAT('%', LOWER(n.description), '%')
+           OR LOWER(n.description) LIKE CONCAT('%', LOWER(@need_description), '%')
+        RETURN s.name AS helper, sk.name AS skill, n.description AS need
+    """
+
+    results = []
+
+    def run_query(transaction):
+        rows = transaction.execute_sql(
+            sql,
+            params={"need_description": need_description},
+            param_types={"need_description": param_types.STRING}
+        )
+
+        for row in rows:
+            helper, skill, need = row
+            results.append({
+                "helper": helper,
+                "skill": skill,
+                "need": need
+            })
+
+    database.run_in_transaction(run_query)
+
+    if not results:
+        return f"No helper found for need: {need_description}"
+
+    lines = [f"Helpers for '{need_description}':"]
+    for r in results:
+        lines.append(f"- {r['helper']} can help with {r['need']} using {r['skill']}")
+
+    return "\n".join(lines)
+

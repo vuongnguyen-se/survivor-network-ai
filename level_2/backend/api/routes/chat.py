@@ -34,12 +34,19 @@ else:
     print("INFO: Initializing InMemory Services")
     
     # TODO: REPLACE_INMEMORY_SERVICES
+    session_service = InMemorySessionService()
+    memory_service = InMemoryMemoryService()
     
 
 # Initialize Runner
 # For sub-agents using memory bank, we must ensure memory service is passed to the runner
 # TODO: REPLACE_RUNNER
-
+runner = Runner(
+    agent=root_agent,
+    app_name="survivor-network",
+    session_service=session_service,
+    memory_service=memory_service
+)
 
 # Global session map to persist mapping between client conversation_ids and ADK session_ids
 # Note: In a production environment with multiple workers, this should be in Redis or database

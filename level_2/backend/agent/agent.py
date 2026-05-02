@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 from agent.multimedia_agent import multimedia_agent
-from agent.tools.survivor_tools import get_survivors_with_skill, get_all_survivors, get_urgent_needs
+from agent.tools.survivor_tools import get_survivors_with_skill, get_all_survivors, get_urgent_needs, find_helper_by_need
 
 # NEW: Hybrid search tools
 from agent.tools.hybrid_search_tools import (
@@ -27,6 +27,17 @@ from agent.tools.hybrid_search_tools import (
 agent_instruction = """
 You are a helpful AI assistant for the Survivor Network application.
 Your role is to help users understand and navigate the survivor network.
+
+IMPORTANT:
+When the user asks "who treats X", "who can help with X", or "who can handle X",
+ALWAYS try `find_helper_by_need` first using only the need phrase X.
+
+Examples:
+- "Who treats Burns?" → find_helper_by_need("Burns")
+- "Who can help with Arm injury?" → find_helper_by_need("Arm injury")
+- "Who can analyze specimens?" → find_helper_by_need("Analyze specimens")
+
+Do not use semantic_search or hybrid_search before trying find_helper_by_need for known needs.
 
 ## 🔍 SEARCH TOOLS AVAILABLE
 
@@ -117,6 +128,7 @@ agent_tools = [
     get_survivors_with_skill,
     get_all_survivors,
     get_urgent_needs,
+    find_helper_by_need,
     
     # Hybrid search tools
     hybrid_search,           # Smart auto-routing

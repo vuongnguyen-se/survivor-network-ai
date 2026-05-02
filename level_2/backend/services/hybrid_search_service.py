@@ -88,15 +88,16 @@ class HybridSearchService:
     
     def __init__(
         self,
-        project_id: str = "neon-emitter-458622-e3",
-        instance_id: str = "survivor-network",
-        database_id: str = "survivor-db"
+        project_id: Optional[str] = None,
+        instance_id: Optional[str] = None,
+        database_id: Optional[str] = None
     ):
-        self.project_id = project_id
-        self.client = spanner.Client(project=project_id)
-        self.instance = self.client.instance(instance_id)
-        self.database = self.instance.database(database_id)
+        # Ưu tiên tham số truyền vào, nếu không có thì lấy từ env, nếu không có nữa mới lấy default cũ
+        self.project_id = project_id or os.getenv('PROJECT_ID') or "neon-emitter-458622-e3"
+        self.instance_id = instance_id or os.getenv('INSTANCE_ID') or "survivor-network"
+        self.database_id = database_id or os.getenv('DATABASE_ID') or "survivor-db"
         
+        self.client = spanner.Client(project=self.project_id)
         # Cache for known values
         self._known_skills: Optional[List[str]] = None
         self._known_categories: Optional[List[str]] = None
@@ -359,7 +360,33 @@ Analyze the query:"""
         results = []
         
        # TODO: REPLACE_SQL
-        
+        sql = """
+            WITH query_embedding AS (
+                SELECT embeddings.values AS val
+                FROM ML.PREDICT(
+                    MODEL TextEmbeddings,
+                    (SELECT @query AS content)
+                )
+            )
+            SELECT
+                s.survivor_id,
+                s.name AS survivor_name,
+                s.biome,
+                sk.skill_id,
+                sk.name AS skill_name,
+                sk.category,
+                COSINE_DISTANCE(
+                    sk.skill_embedding,
+                    (SELECT val FROM query_embedding)
+                ) AS distance
+            FROM Skills sk
+            JOIN SurvivorHasSkill shs ON sk.skill_id = shs.skill_id
+            JOIN Survivors s ON shs.survivor_id = s.survivor_id
+            WHERE sk.skill_embedding IS NOT NULL
+            ORDER BY distance ASC
+            LIMIT @limit
+        """
+
         def run_query(transaction):
             rows = transaction.execute_sql(
                 sql,
