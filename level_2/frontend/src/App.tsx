@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import "./App.css";
 
 // const API_URL = "http://localhost:8080/api/chat";
@@ -17,20 +17,36 @@ type ChatResponse = {
   suggested_followups?: string[];
 };
 
+const INITIAL_MESSAGES: ChatMessage[] = [
+  {
+    role: "assistant",
+    text: "Hello! Ask me about the Survivor Network.",
+  },
+];
+
 function App() {
   const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      text: "Hello! Ask me about the Survivor Network.",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [loading, setLoading] = useState<boolean>(false);
+  const [conversationId, setConversationId] = useState<string>(
+    () => `frontend-chat-${Date.now()}`
+  );
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Whenever having new messages or loading, gọi scrollIntoView() to scroll to the latest message.
+  useEffect(() => {
+    // messagesEndRef.current is the last div in the list
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages, loading]);
 
   async function sendMessage() {
-    if (!message.trim()) return;
+    if (!message.trim() || loading) return;
 
-    const userMessage = message;
+    const userMessage = message.trim();
 
     setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
     setMessage("");
@@ -44,9 +60,13 @@ function App() {
         },
         body: JSON.stringify({
           message: userMessage,
-          conversation_id: "frontend-chat",
+          conversation_id: conversationId,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
 
       const data = (await res.json()) as ChatResponse;
 
@@ -73,7 +93,13 @@ function App() {
     }
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function clearChat() {
+    setMessages(INITIAL_MESSAGES);
+    setMessage("");
+    setConversationId(`frontend-chat-${Date.now()}`);
+  }
+
+  function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -84,8 +110,19 @@ function App() {
     <div className="app">
       <div className="chat-container">
         <header className="header">
-          <h1>Survivor Network AI</h1>
-          <p>Graph RAG assistant powered by Spanner Graph</p>
+          <div>
+            <h1>Survivor Network AI</h1>
+            <p>Graph RAG assistant powered by Spanner Graph</p>
+          </div>
+
+          <button
+            className="clear-button"
+            onClick={clearChat}
+            disabled={loading}
+            type="button"
+          >
+            Clear chat
+          </button>
         </header>
 
         <main className="messages">
@@ -97,9 +134,11 @@ function App() {
 
           {loading && (
             <div className="message assistant">
-              <div className="bubble">Thinking...</div>
+              <div className="bubble thinking">Thinking...</div>
             </div>
           )}
+
+          <div ref={messagesEndRef} />
         </main>
 
         <footer className="input-area">
@@ -109,8 +148,9 @@ function App() {
             onKeyDown={handleKeyDown}
             placeholder="Ask: Who treats Burns?"
             rows={2}
+            disabled={loading}
           />
-          <button onClick={sendMessage} disabled={loading}>
+          <button onClick={sendMessage} disabled={loading} type="button">
             Send
           </button>
         </footer>
