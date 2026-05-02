@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import "./App.css";
 
-// const API_URL = "http://localhost:8080/api/chat";
 const API_URL = "/api/chat";
 
 type ChatMessage = {
@@ -24,6 +23,14 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   },
 ];
 
+const SAMPLE_PROMPTS = [
+  "Who treats Burns?",
+  "Who can help with Arm injury?",
+  "List all survivors",
+  "Who has First Aid skill?",
+  "Who can analyze specimens?",
+];
+
 function App() {
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
@@ -34,21 +41,19 @@ function App() {
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Whenever having new messages or loading, gọi scrollIntoView() to scroll to the latest message.
   useEffect(() => {
-    // messagesEndRef.current is the last div in the list
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
   }, [messages, loading]);
 
-  async function sendMessage() {
-    if (!message.trim() || loading) return;
+  async function sendMessage(promptOverride?: string) {
+    const targetMessage = (promptOverride ?? message).trim();
 
-    const userMessage = message.trim();
+    if (!targetMessage || loading) return;
 
-    setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
+    setMessages((prev) => [...prev, { role: "user", text: targetMessage }]);
     setMessage("");
     setLoading(true);
 
@@ -59,7 +64,7 @@ function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: userMessage,
+          message: targetMessage,
           conversation_id: conversationId,
         }),
       });
@@ -141,6 +146,24 @@ function App() {
           <div ref={messagesEndRef} />
         </main>
 
+        <section className="prompt-panel">
+          <span className="prompt-label">Try asking:</span>
+
+          <div className="prompt-list">
+            {SAMPLE_PROMPTS.map((prompt) => (
+              <button
+                key={prompt}
+                className="prompt-chip"
+                onClick={() => sendMessage(prompt)}
+                disabled={loading}
+                type="button"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        </section>
+
         <footer className="input-area">
           <textarea
             value={message}
@@ -150,7 +173,7 @@ function App() {
             rows={2}
             disabled={loading}
           />
-          <button onClick={sendMessage} disabled={loading} type="button">
+          <button onClick={() => sendMessage()} disabled={loading} type="button">
             Send
           </button>
         </footer>
