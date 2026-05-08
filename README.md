@@ -1,207 +1,449 @@
-# 🚀 Way Back Home
+# Survivor Network AI
 
-![Way Back Home](dashboard/frontend/public/prelude.png)
+AI-powered Graph RAG assistant built with **Google Cloud Spanner Graph**, **FastAPI**, **Google ADK**, and **React**.
 
-**An immersive AI workshop platform where participants learn to build intelligent agents while rescuing a stranded space explorer.**
+This project simulates a survivor rescue network where each survivor has skills, needs, locations, and relationships. The assistant can reason over graph data to answer questions such as:
 
-Way Back Home is a hands-on workshop experience that teaches Google Cloud AI technologies through an engaging narrative. Participants crash-land on an alien planet and must use AI to identify themselves, analyze their surroundings, and coordinate rescue efforts.
+- Who treats Burns?
+- Who can help with Arm injury?
+- Who has First Aid skill?
+- List all survivors
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-waybackhome.dev-blue?style=for-the-badge)](https://waybackhome.dev)
-[![Codelab](https://img.shields.io/badge/Codelab-Level%200-green?style=for-the-badge)](https://codelabs.developers.google.com/way-back-home-level-0/instructions)
-[![Codelab](https://img.shields.io/badge/Codelab-Level%31-orange?style=for-the-badge)](https://codelabs.developers.google.com/way-back-home-level-1/instructions)
-[![Codelab](https://img.shields.io/badge/Codelab-Level%202-green?style=for-the-badge)](x)
-[![Codelab](https://img.shields.io/badge/Codelab-Level%203-orange?style=for-the-badge)](https://codelabs.developers.google.com/way-back-home-level-3/instructions)
-[![Codelab](https://img.shields.io/badge/Codelab-Level%204-green?style=for-the-badge)](https://codelabs.developers.google.com/way-back-home-level-4/instructions)
-[![Codelab](https://img.shields.io/badge/Codelab-Level%205-orange?style=for-the-badge)](https://codelabs.developers.google.com/way-back-home-level-5/instructions)
-## 🎮 The Experience
+Core reasoning path:
 
-You're a space explorer whose ship has crashed on an uncharted planet. Your rescue beacon is offline, and you're scattered across the surface with other survivors. To get home, you must:
-
-| Level | Mission | AI Skills Learned |
-|-------|---------|-------------------|
-| **Level 0** | Generate your explorer identity | Multi-turn image generation, Gemini (Nano Banana) |
-| **Level 1** | Pinpoint your crash location | Multi-agent systems, MCP servers, ADK, parallel processing |
-| **Level 2** | Process incoming SOS signals | Event-driven agents, A2A communication *(coming soon)* |
-| **Level 3** | Coordinate group rescue | Agent orchestration, consensus protocols *(coming soon)* |
-| **Level 4** | Coordinate group rescue | Agent orchestration, consensus protocols *(coming soon)* |
-| **Level 5** | Coordinate group rescue | Agent orchestration, consensus protocols *(coming soon)* |
-
-## 🛠️ Technology Stack
-
-| Component | Technologies |
-|-----------|-------------|
-| **Frontend** | Next.js 14, Three.js, React Three Fiber, Tailwind CSS |
-| **Backend** | FastAPI, Firestore, Firebase Storage, Cloud Run |
-| **AI/ML** | Vertex AI, Gemini 2.5 Flash, Veo 3.1 |
-| **Agents** | Google ADK, MCP (Model Context Protocol), Google Cloud MCP servers |
-| **Infrastructure** | Google Cloud Run, Cloud Build, Artifact Registry |
-
-## 🚀 Quick Start
-
-### For Workshop Participants
-
-1. **Access Cloud Shell** at [console.cloud.google.com](https://console.cloud.google.com)
-
-2. **Clone and setup:**
-   ```bash
-   git clone https://github.com/google-americas/way-back-home.git
-   cd way-back-home
-   ```
-
-3. **Start with Level 0:**
-   ```bash
-   ./scripts/setup.sh
-   cd level_0
-   ```
-
-4. **Follow the codelab:** [Level 0 Instructions](https://codelabs.developers.google.com/way-back-home-level-0/instructions)
-
-### For Workshop Hosts
-
-See [Deployment Guide](#-deployment) below for running your own instance.
-
-## 📚 Documentation
-
-| Component | Description |
-|-----------|-------------|
-| [Level 0 README](level_0/README.md) | Avatar generation with multi-turn image AI |
-| [Level 1 README](level_1/README.md) | Multi-agent crash site analysis |
-| [Backend README](dashboard/backend/README.md) | Mission Control API documentation |
-| [Frontend README](dashboard/frontend/README.md) | 3D map visualization |
-
-## 🏗️ Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           Way Back Home                                  │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│   Participant Journey                                                    │
-│   ───────────────────                                                    │
-│                                                                          │
-│   ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐         │
-│   │ Level 0  │───▶│ Level 1  │───▶│ Level 2  │───▶│ Level 3  │         │
-│   │ Identity │    │ Location │    │   SOS    │    │  Rescue  │         │
-│   └──────────┘    └──────────┘    └──────────┘    └──────────┘         │
-│        │               │                                                 │
-│        ▼               ▼                                                 │
-│   ┌─────────────────────────────────────────────────────────────┐       │
-│   │                    Backend API (Cloud Run)                   │       │
-│   │  • Participant registration    • Evidence storage            │       │
-│   │  • Location confirmation       • Event management            │       │
-│   └─────────────────────────────────────────────────────────────┘       │
-│        │               │                                                 │
-│        ▼               ▼                                                 │
-│   ┌──────────┐    ┌──────────┐    ┌──────────────────────────┐         │
-│   │Firestore │    │ Firebase │    │      Frontend (Next.js)   │         │
-│   │          │    │ Storage  │    │  • 3D planet visualization │         │
-│   │• events  │    │• avatars │    │  • Real-time participant   │         │
-│   │• users   │    │• evidence│    │    tracking                │         │
-│   └──────────┘    └──────────┘    └──────────────────────────┘         │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+```text
+Survivor → Skill → Need
 ```
 
-## 🌐 Deployment
+Example:
 
-### Deploy Your Own Instance
-
-1. **Prerequisites:**
-   - Google Cloud project with billing enabled
-   - Firebase project (Firestore + Storage + Auth)
-   - Domain names (optional, for custom URLs)
-
-2. **Clone and configure:**
-   ```bash
-   git clone https://github.com/google-americas/way-back-home.git
-   cd way-back-home
-   
-   # Configure your project
-   gcloud config set project YOUR_PROJECT_ID
-   ```
-
-3. **Run infrastructure setup:**
-   ```bash
-   ./scripts/setup-infrastructure.sh
-   ```
-
-4. **Deploy all services:**
-   ```bash
-   gcloud builds submit --config cloudbuild.yaml \
-     --substitutions=_API_BASE_URL=https://api.yourdomain.dev,_MAP_BASE_URL=https://yourdomain.dev
-   ```
-
-### Environment Configuration
-
-Create a `set_env.sh` in project root (generated by setup scripts):
-
-```bash
-export GOOGLE_CLOUD_PROJECT="your-project-id"
-export REGION="us-central1"
-export API_BASE_URL="https://api.yourdomain.dev"
-export MAP_BASE_URL="https://yourdomain.dev"
+```text
+Dr. Elena Frost → Medical Training → Burns
 ```
-
-## 🎓 Workshop Hosting Guide
-
-### Before the Workshop
-
-1. Deploy backend and frontend to your GCP project
-2. Create an event in the admin panel or via API:
-   ```bash
-   curl -X POST https://api.yourdomain.dev/admin/events \
-     -H "Authorization: Bearer $FIREBASE_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{"code": "your-event-code", "name": "Your Workshop Name"}'
-   ```
-3. Generate QR codes pointing to your event URL
-4. Test the full flow with a sample participant
-
-### During the Workshop
-
-1. Share the event code with participants
-2. Direct them to the [Level 0 Codelab](https://codelabs.developers.google.com/way-back-home-level-0/instructions)
-3. Monitor the live map at `https://yourdomain.dev/e/your-event-code`
-4. Celebrate as beacons light up across the planet!
-
-### Cost Estimates
-
-| Component | Approximate Cost |
-|-----------|-----------------|
-| Level 0 (per participant) | ~$0.08 (2 images) |
-| Level 1 (per participant) | ~$0.15 (images + video + agent calls) |
-| Cloud Run (idle) | ~$0/month (scales to zero) |
-| Firestore (500 participants) | < $1/month |
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
-
-### Development Setup
-
-```bash
-# Backend
-cd dashboard/backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8080
-
-# Frontend
-cd dashboard/frontend
-npm install
-npm run dev
-```
-
-## 📄 License
-
-Apache 2.0 - See [LICENSE](LICENSE) for details.
-
-## 🙏 Acknowledgments
-
-- Built with [Google ADK](https://github.com/google/adk-python) (Agent Development Kit)
-- Powered by [Vertex AI](https://cloud.google.com/vertex-ai) and [Gemini](https://deepmind.google/technologies/gemini/)
-- 3D visualization with [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
 
 ---
 
-**Ready to find your way back home?** Start with [Level 0](level_0/README.md) 🚀
+## Demo
+
+> Add screenshot here.
+
+Example interaction:
+
+```text
+User: Who treats Burns?
+Assistant: Dr. Elena Frost can help with Burns using Medical Training.
+```
+
+```text
+User: Who can help with Arm injury?
+Assistant: Dr. Elena Frost can help with Arm injury using Medical Training.
+```
+
+---
+
+## Key Features
+
+- FastAPI backend for chat and graph APIs
+- Google Cloud Spanner Graph database
+- Multi-hop graph reasoning over survivors, skills, and needs
+- Google ADK agent integration
+- Hybrid / semantic search support
+- Deterministic graph fallback for reliable helper lookup
+- React + Vite chat UI
+- Auto-scroll chat experience
+- Clear chat action
+- Sample prompt buttons for quick demos
+- Cloud Shell friendly setup
+
+---
+
+## Why Graph RAG?
+
+A normal chatbot may rely mostly on text similarity.
+
+This project uses graph relationships to reason through connected data.
+
+For example, to answer:
+
+```text
+Who treats Burns?
+```
+
+the system follows this graph path:
+
+```text
+Burns
+← SkillTreatsNeed
+Medical Training
+← SurvivorHasSkill
+Dr. Elena Frost
+```
+
+So the assistant can answer:
+
+```text
+Dr. Elena Frost can help with Burns using Medical Training.
+```
+
+---
+
+## Architecture
+
+```text
+React Frontend
+  ↓
+FastAPI Backend
+  ↓
+Google ADK Agent
+  ↓
+Graph Tools / Search Tools
+  ↓
+Cloud Spanner Graph
+```
+
+Main graph relationship:
+
+```text
+Survivors -[SurvivorHasSkill]-> Skills -[SkillTreatsNeed]-> Needs
+```
+
+Deterministic helper lookup:
+
+```sql
+GRAPH SurvivorNetwork
+MATCH (s:Survivors)-[:SurvivorHasSkill]->(sk:Skills)-[:SkillTreatsNeed]->(n:Needs)
+WHERE LOWER(n.description) = LOWER(@need_description)
+RETURN s.name AS helper, sk.name AS skill, n.description AS need
+```
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- React
+- TypeScript
+- Vite
+- CSS
+
+### Backend
+
+- Python
+- FastAPI
+- Uvicorn
+- Google ADK
+
+### Cloud / Data
+
+- Google Cloud
+- Cloud Spanner Graph
+- Vertex AI / Gemini
+- Google Cloud Storage
+
+---
+
+## Project Structure
+
+```text
+survivor-network-ai/
+  backend/
+    agent/
+    api/
+    config/
+    extractors/
+    models/
+    services/
+    main.py
+    setup_data.py
+    pyproject.toml
+
+  frontend/
+    src/
+    public/
+    package.json
+    vite.config.ts
+
+  scripts/
+  init.sh
+  setup.sh
+  README.md
+```
+
+Main folders:
+
+- `backend/` — FastAPI backend, ADK agent, graph tools, Spanner services
+- `frontend/` — React chat UI
+- `scripts/` — supporting setup scripts
+
+---
+
+## Cloud Shell Quick Start
+
+This project is designed to run well in **Google Cloud Shell Editor**.
+
+> This project requires a Google Cloud account with billing enabled because it uses Cloud Spanner Graph, Vertex AI / Gemini, and Cloud Storage.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/vuongnguyen-se/survivor-network-ai.git
+cd survivor-network-ai
+```
+
+### 2. Authenticate Google Cloud
+
+```bash
+gcloud auth list
+gcloud auth application-default login
+```
+
+### 3. Initialize Google Cloud resources
+
+```bash
+./init.sh
+./setup.sh
+```
+
+These scripts configure:
+
+```text
+Google Cloud project
+Billing link
+Cloud Storage bucket
+Spanner configuration
+.env file
+```
+
+The `.env` file is generated locally and should not be committed to GitHub.
+
+### 4. Load sample graph data
+
+```bash
+cd backend
+uv sync
+uv run python setup_data.py
+```
+
+This creates the sample Survivor Network graph database.
+
+Expected resources:
+
+```text
+Instance: survivor-network
+Database: graph-db
+Graph: SurvivorNetwork
+```
+
+---
+
+## Run Locally in Cloud Shell
+
+### Backend
+
+Open terminal 1:
+
+```bash
+cd backend
+
+set -a
+source ../.env
+set +a
+
+uv run uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+```
+
+Backend runs on:
+
+```text
+http://localhost:8080
+```
+
+### Frontend
+
+Open terminal 2:
+
+```bash
+cd frontend
+npm install
+npm run dev -- --host 0.0.0.0
+```
+
+Frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+In Google Cloud Shell, open:
+
+```text
+Web Preview → Preview on port 5173
+```
+
+---
+
+## API Examples
+
+### Get graph data
+
+```bash
+curl -s http://localhost:8080/api/graph
+```
+
+### Ask the assistant
+
+```bash
+curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Who treats Burns?","conversation_id":"demo-1"}'
+```
+
+Expected response:
+
+```json
+{
+  "answer": "Dr. Elena Frost can help with Burns using Medical Training.",
+  "gql_query": null,
+  "nodes_to_highlight": [],
+  "edges_to_highlight": [],
+  "suggested_followups": []
+}
+```
+
+---
+
+## Spanner Graph Query Example
+
+To visualize graph reasoning in Spanner Studio:
+
+```sql
+GRAPH SurvivorNetwork
+MATCH result = (s:Survivors)-[:SurvivorHasSkill]->(sk:Skills)-[:SkillTreatsNeed]->(n:Needs)
+RETURN TO_JSON(result) AS graph_result
+```
+
+To find who treats Burns:
+
+```sql
+GRAPH SurvivorNetwork
+MATCH result = (s:Survivors)-[:SurvivorHasSkill]->(sk:Skills)-[:SkillTreatsNeed]->(n:Needs)
+WHERE n.description = "Burns"
+RETURN TO_JSON(result) AS graph_result
+```
+
+Expected path:
+
+```text
+Dr. Elena Frost → Medical Training → Burns
+```
+
+---
+
+## Example Questions
+
+Try these prompts in the UI:
+
+```text
+Who treats Burns?
+Who can help with Arm injury?
+Who can analyze specimens?
+Who has First Aid skill?
+List all survivors
+```
+
+---
+
+## What I Built / Customized
+
+This project started from a Google Cloud codelab structure and was refactored into a cleaner portfolio project.
+
+Custom work includes:
+
+- Refactored the repository from a multi-level codelab structure into a clean `backend/` and `frontend/` layout
+- Fixed missing backend TODOs for ADK session and runner setup
+- Added missing semantic search tool wiring
+- Added missing RAG SQL logic in the hybrid search service
+- Added deterministic graph fallback tool: `find_helper_by_need`
+- Improved agent routing so known needs use graph lookup before semantic search
+- Built and connected a React chat UI to the FastAPI backend
+- Added Vite proxy configuration for frontend-backend communication
+- Added auto-scroll chat behavior
+- Added clear chat functionality
+- Added sample prompt buttons for easier demos
+- Verified backend and frontend after repository refactor
+
+---
+
+## Deterministic Fallback Strategy
+
+Semantic search and LLM-based routing can fail due to quota limits, model errors, or ambiguous prompts.
+
+To make the system more reliable, this project includes a deterministic fallback:
+
+```text
+Known need phrase
+→ direct graph query
+→ helper + skill result
+```
+
+Example:
+
+```text
+Who treats Burns?
+→ find_helper_by_need("Burns")
+→ Dr. Elena Frost can help with Burns using Medical Training.
+```
+
+This reduces unnecessary model calls and makes important graph queries more reliable.
+
+---
+
+## Current Limitations
+
+- Semantic search depends on Vertex AI / Gemini availability and quota
+- Authentication and production-grade security are not implemented yet
+- The current UI focuses on chat, not full 3D graph visualization yet
+- The app currently uses sample survivor data
+- Cloud resources may incur costs if left running
+
+---
+
+## Roadmap
+
+Planned improvements:
+
+- Add graph visualization for Survivors, Skills, Needs, and relationships
+- Add richer mission-control style UI
+- Add image/video upload flow for multimodal extraction
+- Improve error handling and fallback behavior
+- Add persistent memory support
+- Add Cloud Run deployment guide
+- Add demo screenshots and GIFs to this README
+
+---
+
+## Cost and Cleanup Notes
+
+This project creates Google Cloud resources that may incur costs.
+
+Recommended cleanup after testing:
+
+```bash
+gcloud projects delete $(cat ~/project_id.txt)
+```
+
+Or manually remove:
+
+```text
+Cloud Spanner instance
+Cloud Storage bucket
+Cloud Run services
+Artifact Registry images
+```
+
+---
+
+## Attribution
+
+This project is based on the Google Cloud Survivor Network codelab and has been customized with backend fixes, deterministic graph fallback logic, a React chat UI, and a cleaner portfolio-oriented repository structure.
