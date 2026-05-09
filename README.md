@@ -25,7 +25,7 @@ Dr. Elena Frost → Medical Training → Burns
 
 ## Demo
 
-> Add screenshot here.
+![Survivor Network AI chat UI](docs/screenshots/chat-ui-demo.png)
 
 Example interaction:
 
