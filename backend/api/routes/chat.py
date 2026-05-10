@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from models.chat import ChatRequest, ChatResponse
 from agent.agent import root_agent
+from agent.tools.survivor_tools import find_helper_by_need, get_survivors_with_skill, get_all_survivors
 
 from google.adk import Runner
 from google.adk.sessions import InMemorySessionService, VertexAiSessionService
@@ -51,10 +52,86 @@ runner = Runner(
 # Global session map to persist mapping between client conversation_ids and ADK session_ids
 # Note: In a production environment with multiple workers, this should be in Redis or database
 SESSION_MAP = {} 
+def extract_known_need(message: str) -> str | None:
+    """
+    Lightweight deterministic router for common demo questions.
+    This avoids unnecessary LLM calls for known graph-backed needs.
+    """
+    normalized = message.lower().strip()
+
+    known_needs = {
+        "burns": "Burns",
+        "burn": "Burns",
+        "arm injury": "Arm injury",
+        "injured arm": "Arm injury",
+        "analyze specimens": "Analyze specimens",
+        "biological specimens": "Analyze specimens",
+        "specimens": "Analyze specimens",
+    }
+
+    for phrase, need in known_needs.items():
+        if phrase in normalized:
+            return need
+
+    return None
+
+
+def extract_known_skill(message: str) -> str | None:
+    """
+    Lightweight deterministic router for common skill lookup questions.
+    """
+    normalized = message.lower().strip()
+
+    known_skills = {
+        "first aid": "First Aid",
+        "medical training": "Medical Training",
+        "xenobiology": "Xenobiology",
+        "engineering": "Engineering",
+    }
+
+    for phrase, skill in known_skills.items():
+        if phrase in normalized:
+            return skill
+
+    return None
 
 @router.post("", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
+        # Deterministic pre-router for reliable demo queries.
+        # These paths avoid ADK/Gemini calls and query graph-backed tools directly.
+        if not request.attachments:
+            known_need = extract_known_need(request.message)
+            if known_need:
+                answer = await find_helper_by_need(known_need)
+                return ChatResponse(
+                    answer=answer,
+                    gql_query=None,
+                    nodes_to_highlight=[],
+                    edges_to_highlight=[],
+                    suggested_followups=[]
+                )
+
+            known_skill = extract_known_skill(request.message)
+            if known_skill:
+                answer = await get_survivors_with_skill(known_skill)
+                return ChatResponse(
+                    answer=answer,
+                    gql_query=None,
+                    nodes_to_highlight=[],
+                    edges_to_highlight=[],
+                    suggested_followups=[]
+                )
+
+            if "list all survivors" in request.message.lower() or "all survivors" in request.message.lower():
+                answer = await get_all_survivors()
+                return ChatResponse(
+                    answer=answer,
+                    gql_query=None,
+                    nodes_to_highlight=[],
+                    edges_to_highlight=[],
+                    suggested_followups=[]
+                )
         user_id = "test-user" # In a real app, get this from auth
         conversation_id = request.conversation_id or "default-session"
         
