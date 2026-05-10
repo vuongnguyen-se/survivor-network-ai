@@ -23,6 +23,19 @@ Dr. Elena Frost → Medical Training → Burns
 
 ---
 
+## Live Demo
+
+- Frontend: [<YOUR_FRONTEND_URL>](https://survivor-network-ui-y3rxpbgf6q-uc.a.run.app)
+- Backend API: [<YOUR_BACKEND_URL>](https://survivor-network-api-y3rxpbgf6q-uc.a.run.app)
+
+Try these prompts:
+
+```text
+Who treats Burns?
+Who can help with Arm injury?
+Who has First Aid skill?
+List all survivors
+
 ## Demo
 
 ![Survivor Network AI chat UI](docs/screenshots/chat-ui-demo.png)
