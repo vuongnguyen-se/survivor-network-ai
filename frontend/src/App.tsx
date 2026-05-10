@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import "./App.css";
 
-const API_URL = "/api/chat";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = `${API_BASE_URL}/api/chat`;
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -27,7 +28,7 @@ const SAMPLE_PROMPTS = [
   "Who treats Burns?",
   "Who can help with Arm injury?",
   "List all survivors",
-  "Who has First Aid skill?",
+  "Who has First Aid skill?", 
   "Who can analyze specimens?",
 ];
 
