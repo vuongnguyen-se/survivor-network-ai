@@ -363,6 +363,8 @@ Who can help with Arm injury?
 Who can analyze specimens?
 Who has First Aid skill?
 List all survivors
+List all skills
+List all needs
 ```
 
 ---
@@ -385,6 +387,7 @@ Custom work includes:
 - Added clear chat functionality
 - Added sample prompt buttons for easier demos
 - Verified backend and frontend after repository refactor
+- Added deterministic list tools for survivors, skills, and needs to improve demo reliability without requiring LLM calls.
 
 ---
 
