@@ -1,7 +1,13 @@
 from fastapi import APIRouter
 from models.chat import ChatRequest, ChatResponse
 from agent.agent import root_agent
-from agent.tools.survivor_tools import find_helper_by_need, get_survivors_with_skill, get_all_survivors
+from agent.tools.survivor_tools import (
+    find_helper_by_need,
+    get_survivors_with_skill, 
+    get_all_survivors,
+    get_all_needs,
+    get_all_skills
+)
 
 from google.adk import Runner
 from google.adk.sessions import InMemorySessionService, VertexAiSessionService
@@ -125,6 +131,26 @@ async def chat(request: ChatRequest):
 
             if "list all survivors" in request.message.lower() or "all survivors" in request.message.lower():
                 answer = await get_all_survivors()
+                return ChatResponse(
+                    answer=answer,
+                    gql_query=None,
+                    nodes_to_highlight=[],
+                    edges_to_highlight=[],
+                    suggested_followups=[]
+                )
+
+            if "list all skills" in request.message.lower() or "all skills" in request.message.lower():
+                answer = await get_all_skills()
+                return ChatResponse(
+                    answer=answer,
+                    gql_query=None,
+                    nodes_to_highlight=[],
+                    edges_to_highlight=[],
+                    suggested_followups=[]
+                )
+
+            if "list all needs" in request.message.lower() or "all needs" in request.message.lower():
+                answer = await get_all_needs()
                 return ChatResponse(
                     answer=answer,
                     gql_query=None,

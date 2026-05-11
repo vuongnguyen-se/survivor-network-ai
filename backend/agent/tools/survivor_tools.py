@@ -87,6 +87,81 @@ async def get_all_survivors() -> str:
         traceback.print_exc()
         return f"Error listing survivors: {str(e)}"
 
+async def get_all_skills() -> str:
+    """
+    List all skills in the survivor network.
+
+    Returns:
+        A formatted string listing all skills.
+    """
+    try:
+        spanner = SpannerService()
+        graph_service = GraphService(spanner)
+
+        graph_data = await graph_service.get_full_graph()
+
+        skills = []
+        for node in graph_data.nodes:
+            if node.type == NodeType.SKILL:
+                skills.append(node.label)
+
+        if not skills:
+            return "No skills found in the network."
+
+        skills = sorted(set(skills))
+
+        return "All Skills:\n- " + "\n- ".join(skills)
+
+    except Exception as e:
+        print(f"Error in get_all_skills: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Error listing skills: {str(e)}"
+
+
+async def get_all_needs() -> str:
+    """
+    List all needs in the survivor network.
+
+    Returns:
+        A formatted string listing all needs.
+    """
+    try:
+        spanner = SpannerService()
+        graph_service = GraphService(spanner)
+
+        graph_data = await graph_service.get_full_graph()
+
+        needs = []
+        for node in graph_data.nodes:
+            if node.type == NodeType.NEED:
+                urgency = node.properties.get("urgency")
+                category = node.properties.get("category")
+
+                details = []
+                if category:
+                    details.append(f"Category: {category}")
+                if urgency:
+                    details.append(f"Urgency: {urgency}")
+
+                if details:
+                    needs.append(f"{node.label} ({', '.join(details)})")
+                else:
+                    needs.append(node.label)
+
+        if not needs:
+            return "No needs found in the network."
+
+        needs = sorted(set(needs))
+
+        return "All Needs:\n- " + "\n- ".join(needs)
+
+    except Exception as e:
+        print(f"Error in get_all_needs: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"Error listing needs: {str(e)}"
+
 async def get_urgent_needs() -> str:
     """
     Finds and lists urgent needs currently affecting survivors.
