@@ -25,8 +25,8 @@ Dr. Elena Frost → Medical Training → Burns
 
 ## Live Demo
 
-- Frontend: [<YOUR_FRONTEND_URL>](https://survivor-network-ui-y3rxpbgf6q-uc.a.run.app)
-- Backend API: [<YOUR_BACKEND_URL>](https://survivor-network-api-y3rxpbgf6q-uc.a.run.app)
+- Frontend: [Frontend Live Demo](https://survivor-network-ui-y3rxpbgf6q-uc.a.run.app)
+- Backend API: [Backend API](https://survivor-network-api-y3rxpbgf6q-uc.a.run.app)
 
 Try these prompts:
 
